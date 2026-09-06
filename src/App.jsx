@@ -121,7 +121,7 @@ const initialTokens = [
 const translationsHi = {
   "Connecting Farmers, Buyers & Procurement Centres": "किसानों, खरीदारों और खरीद केंद्रों को जोड़ना",
   "Choose your role": "अपनी भूमिका चुनें",
-  "Select how you want to access the Kisan Setu platform.": "Kisan Setu प्लेटफ़ॉर्म का उपयोग करने के लिए अपनी भूमिका चुनें।",
+  "Select how you want to access the Nova Farm platform.": "Nova Farm प्लेटफ़ॉर्म का उपयोग करने के लिए अपनी भूमिका चुनें।",
   "Farmer": "किसान",
   "Sell your crop, compare options and book procurement tokens.": "अपनी फसल बेचें, विकल्पों की तुलना करें और खरीद टोकन बुक करें।",
   "Procurement Officer": "खरीद अधिकारी",
@@ -141,7 +141,7 @@ const translationsHi = {
   "PROCUREMENT OFFICER LOGIN": "खरीद अधिकारी लॉगिन",
   "VERIFIED BUYER LOGIN": "सत्यापित खरीदार लॉगिन",
   "ADMIN LOGIN": "एडमिन लॉगिन",
-  "Login to access your Kisan Setu dashboard.": "अपने Kisan Setu डैशबोर्ड को एक्सेस करने के लिए लॉगिन करें।",
+  "Login to access your Nova Farm dashboard.": "अपने Nova Farm डैशबोर्ड को एक्सेस करने के लिए लॉगिन करें।",
   "Farmer ID": "किसान ID",
   "Officer ID": "अधिकारी ID",
   "Buyer / Business ID": "खरीदार / बिज़नेस ID",
@@ -163,7 +163,7 @@ const translationsHi = {
   "Select Crop": "फसल चुनें",
   "Expected Quantity (Quintal)": "अनुमानित मात्रा (क्विंटल)",
   "Compare Selling Options →": "बिक्री विकल्पों की तुलना करें →",
-  "💡 Kisan Setu": "💡 Kisan Setu",
+  "💡 Nova Farm": "💡 Nova Farm",
   "Government MSP aur verified private buyer demand ko compare karke farmer ko better option choose karne mein help karta hai.": "सरकारी MSP और सत्यापित निजी खरीदार की मांग की तुलना करके किसान को बेहतर विकल्प चुनने में मदद करता है।",
   "SELLING OPTIONS": "बिक्री विकल्प",
   "Compare government procurement with verified market demand.": "सरकारी खरीद और सत्यापित बाज़ार की मांग की तुलना करें।",
@@ -235,7 +235,7 @@ const translationsHi = {
   "Remove": "हटाएं",
   "PLATFORM ADMINISTRATION": "प्लेटफ़ॉर्म प्रशासन",
   "Admin Dashboard": "एडमिन डैशबोर्ड",
-  "Monitor Kisan Setu users and operations.": "Kisan Setu यूज़र्स और संचालन की निगरानी करें।",
+  "Monitor Nova Farm users and operations.": "Nova Farm यूज़र्स और संचालन की निगरानी करें।",
   "● SYSTEM ONLINE": "● सिस्टम ऑनलाइन",
   "Registered Farmers": "रजिस्टर्ड किसान",
   "Verified Buyers": "सत्यापित खरीदार",
@@ -261,7 +261,7 @@ const translationsHi = {
   "Roles": "भूमिकाएं",
   "← Back": "← वापस",
   "← Back to roles": "← भूमिका चयन पर वापस",
-  "© 2026 Kisan Setu • Smart Agriculture Procurement Platform": "© 2026 Kisan Setu • स्मार्ट कृषि खरीद प्लेटफ़ॉर्म",
+  "© 2026 Nova Farm • Smart Agriculture Procurement Platform": "© 2026 Nova Farm • स्मार्ट कृषि खरीद प्लेटफ़ॉर्म",
   "Enter Farmer ID": "किसान ID दर्ज करें",
   "Enter Officer ID": "अधिकारी ID दर्ज करें",
   "Enter Buyer ID": "खरीदार ID दर्ज करें",
@@ -288,9 +288,9 @@ const translationsHi = {
   "possible upside": "तक अतिरिक्त लाभ संभव",
   "⚠️ Token / queue required": "⚠️ टोकन / कतार आवश्यक",
   "✔ MSP price protected": "✔ MSP मूल्य सुरक्षित",
-  "🌾 Kisan Setu": "🌾 Kisan Setu",
+  "🌾 Nova Farm": "🌾 Nova Farm",
   "🔐 Secure access": "🔐 सुरक्षित प्रवेश",
-  "KISAN SETU PLATFORM": "KISAN SETU प्लेटफ़ॉर्म",
+  "NOVA FARM PLATFORM": "NOVA FARM प्लेटफ़ॉर्म",
   "/quintal": "/क्विंटल",
   "LIVE TOKEN STATUS": "लाइव टोकन स्थिति",
   "Your procurement journey is updated in real time.": "आपकी खरीद प्रक्रिया रियल टाइम में अपडेट होती है।",
@@ -312,7 +312,7 @@ const translationsHi = {
   "Register as a New Buyer →": "नए खरीदार के रूप में रजिस्टर करें →",
   "NEW BUYER REGISTRATION": "नया खरीदार पंजीकरण",
   "Register as a New Buyer": "नए खरीदार के रूप में रजिस्टर करें",
-  "Create your buyer profile for Kisan Setu.": "Kisan Setu के लिए अपना खरीदार प्रोफाइल बनाएं।",
+  "Create your buyer profile for Nova Farm.": "Nova Farm के लिए अपना खरीदार प्रोफाइल बनाएं।",
   "Owner / Contact Name": "मालिक / संपर्क नाम",
   "Business / Company Name": "बिज़नेस / कंपनी का नाम",
   "Email Address": "ईमेल पता",
@@ -338,7 +338,7 @@ const translationsHi = {
   "Registration submitted successfully.": "पंजीकरण सफलतापूर्वक सबमिट हो गया।",
   "Your application is now pending Admin verification.": "आपका आवेदन अब Admin सत्यापन के लिए लंबित है।",
   "AI Voice Assistant": "AI वॉइस असिस्टेंट",
-  "Get quick help with Kisan Setu features and procurement.": "Kisan Setu के फीचर्स और खरीद प्रक्रिया में तुरंत मदद पाएं।",
+  "Get quick help with Nova Farm features and procurement.": "Nova farm के फीचर्स और खरीद प्रक्रिया में तुरंत मदद पाएं।",
   "Ask Assistant": "असिस्टेंट से पूछें",
   "Voice Assistant": "वॉइस असिस्टेंट",
   "Voice assistance will be available soon.": "वॉइस असिस्टेंस जल्द उपलब्ध होगा।",
@@ -1259,7 +1259,7 @@ const updateTokenStatus = async (tokenId) => {
 
         <div>
           <div className="logo">
-            {t("🌾 Kisan Setu")}
+            {t("🌾 Nova Farm")}
           </div>
 
           <div className="tagline">
@@ -1323,7 +1323,7 @@ const updateTokenStatus = async (tokenId) => {
 
             <div>
               <div className="eyebrow">
-                {t("KISAN SETU PLATFORM")}
+                {t("NOVA FARM PLATFORM")}
               </div>
 
               <h1>
@@ -1331,7 +1331,7 @@ const updateTokenStatus = async (tokenId) => {
               </h1>
 
               <p>
-                {t("Select how you want to access the Kisan Setu platform.")}
+                {t("Select how you want to access the Nova Farm platform.")}
               </p>
             </div>
 
@@ -1478,8 +1478,8 @@ const updateTokenStatus = async (tokenId) => {
 
             <p className="login-subtitle">
               {loginRole === "buyer" && buyerRegisterMode
-                ? t("Create your buyer profile for Kisan Setu.")
-                : t("Login to access your Kisan Setu dashboard.")}
+                ? t("Create your buyer profile for Nova Farm.")
+                : t("Login to access your Nova Farm dashboard.")}
             </p>
 
             {loginRole === "buyer" && buyerRegisterMode ? (
@@ -1866,7 +1866,7 @@ const updateTokenStatus = async (tokenId) => {
                   {t("AI Voice Assistant")}
                 </strong>
                 <span style={{ color: "#64748b", fontSize: "14px" }}>
-                  {t("Get quick help with Kisan Setu features and procurement.")}
+                  {t("Get quick help with Nova Farm features and procurement.")}
                 </span>
               </div>
             </div>
@@ -1988,7 +1988,7 @@ const updateTokenStatus = async (tokenId) => {
           <div className="info-card">
 
             <strong>
-              {t("💡 Kisan Setu")}
+              {t("💡 Nova Farm")}
             </strong>
 
             <p>
@@ -3114,7 +3114,7 @@ const updateTokenStatus = async (tokenId) => {
               </h1>
 
               <p>
-                {t("Monitor Kisan Setu users and operations.")}
+                {t("Monitor Nova Farm users and operations.")}
               </p>
 
             </div>
@@ -3533,7 +3533,7 @@ const updateTokenStatus = async (tokenId) => {
       <footer>
 
         <p>
-          {t("© 2026 Kisan Setu • Smart Agriculture Procurement Platform")}
+          {t("© 2026 Nova Farm • Smart Agriculture Procurement Platform")}
         </p>
 
       </footer>
