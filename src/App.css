@@ -959,7 +959,7 @@ footer small {
 
 }
 /* =========================================
-   KISAN SETU - AUTH / LOGIN
+   NOVA FARM - AUTH / LOGIN
 ========================================= */
 
 .header-actions {
@@ -1438,7 +1438,7 @@ footer small {
   }
 }
 /* =========================================
-   KISAN SETU - LIVE TOKEN STATUS
+   NOVA FARM - LIVE TOKEN STATUS
    Add this block at the bottom of App.css
 ========================================= */
 
@@ -1598,3 +1598,4 @@ footer small {
     grid-template-columns: 1fr;
   }
 }
+
