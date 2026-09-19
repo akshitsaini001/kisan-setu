@@ -344,7 +344,11 @@ const translationsHi = {
   "Voice assistance will be available soon.": "वॉइस असिस्टेंस जल्द उपलब्ध होगा।",
   "Tap to Speak": "बोलने के लिए टैप करें",
   "Demo Feature": "डेमो फीचर",
-  "Close": "बंद करें"
+  "Close": "बंद करें",
+    "Payment Processing": "भुगतान प्रक्रिया में",
+  "Payment Completed": "भुगतान पूरा हो गया",
+  "Start Payment": "भुगतान शुरू करें",
+  "Complete Payment": "भुगतान पूरा करें",
 };
 
 /* =========================================
@@ -421,103 +425,160 @@ function App() {
       window.removeEventListener("storage", handleStorage);
     };
   }, []);
+/* =========================================
+   SUPABASE TOKEN REALTIME
+========================================= */
 
-  /* =========================================
-     SUPABASE TOKEN REALTIME
-  ========================================= */
+useEffect(() => {
+  const channel = supabase
+    .channel("kisan-setu-token-updates")
 
-  useEffect(() => {
-    const channel = supabase
-      .channel("kisan-setu-token-updates")
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "tokens",
-        },
-        (payload) => {
-          console.log("Realtime token update:", payload);
+    /* =========================================
+       NEW TOKEN BOOKED - INSERT
+    ========================================= */
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "tokens",
+      },
+      (payload) => {
+        console.log("Realtime NEW token:", payload);
 
-          const updatedToken = payload.new;
+        const newTokenData = payload.new;
 
-          setTokens((prev) =>
-            prev.map((token) => {
-              if (token.id !== updatedToken.token_id) {
-                return token;
-              }
+        const newToken = {
+          id: newTokenData.token_id,
+          farmer: newTokenData.farmer,
+          crop: newTokenData.crop,
+          quantity: Number(newTokenData.quantity),
+          centre: newTokenData.centre,
+          status: newTokenData.status,
+          createdAt: newTokenData.created_at,
+          updatedAt: newTokenData.updated_at,
+          history: [],
+        };
 
-              return {
-                ...token,
-                status: updatedToken.status,
-                updatedAt: updatedToken.updated_at,
-              };
-            })
+        setTokens((prev) => {
+          // Prevent duplicate token on the farmer device.
+          // The farmer already adds its own token locally.
+          const alreadyExists = prev.some(
+            (token) => token.id === newToken.id
           );
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "token_history",
-        },
-        async (payload) => {
-          console.log("Realtime history update:", payload);
 
-          const newHistory = payload.new;
-
-          const { data: tokenData, error } = await supabase
-            .from("tokens")
-            .select("token_id")
-            .eq("id", newHistory.token_id)
-            .single();
-
-          if (error || !tokenData) {
-            console.error("History token lookup error:", error);
-            return;
+          if (alreadyExists) {
+            return prev;
           }
 
-          setTokens((prev) =>
-            prev.map((token) => {
-              if (token.id !== tokenData.token_id) {
-                return token;
-              }
+          return [...prev, newToken];
+        });
+      }
+    )
 
-              const alreadyExists = (token.history || []).some(
-                (item) =>
-                  item.status === newHistory.status &&
-                  item.time === newHistory.event_time
-              );
+    /* =========================================
+       TOKEN STATUS UPDATE
+    ========================================= */
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "tokens",
+      },
+      (payload) => {
+        console.log("Realtime token update:", payload);
 
-              if (alreadyExists) {
-                return token;
-              }
+        const updatedToken = payload.new;
 
-              return {
-                ...token,
-                history: [
-                  ...(token.history || []),
-                  {
-                    id: newHistory.id,
-                    status: newHistory.status,
-                    time: newHistory.event_time,
-                  },
-                ],
-              };
-            })
+        setTokens((prev) =>
+          prev.map((token) => {
+            if (token.id !== updatedToken.token_id) {
+              return token;
+            }
+
+            return {
+              ...token,
+              status: updatedToken.status,
+              updatedAt: updatedToken.updated_at,
+            };
+          })
+        );
+      }
+    )
+
+    /* =========================================
+       TOKEN HISTORY UPDATE
+    ========================================= */
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "token_history",
+      },
+      async (payload) => {
+        console.log("Realtime history update:", payload);
+
+        const newHistory = payload.new;
+
+        const { data: tokenData, error } = await supabase
+          .from("tokens")
+          .select("token_id")
+          .eq("id", newHistory.token_id)
+          .single();
+
+        if (error || !tokenData) {
+          console.error(
+            "History token lookup error:",
+            error
           );
+          return;
         }
-      )
-      .subscribe((status) => {
-        console.log("Realtime subscription:", status);
-      });
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+        setTokens((prev) =>
+          prev.map((token) => {
+            if (token.id !== tokenData.token_id) {
+              return token;
+            }
+
+            const alreadyExists = (token.history || []).some(
+              (item) =>
+                item.status === newHistory.status &&
+                item.time === newHistory.event_time
+            );
+
+            if (alreadyExists) {
+              return token;
+            }
+
+            return {
+              ...token,
+              history: [
+                ...(token.history || []),
+                {
+                  id: newHistory.id,
+                  status: newHistory.status,
+                  time: newHistory.event_time,
+                },
+              ],
+            };
+          })
+        );
+      }
+    )
+
+    /* =========================================
+       SUBSCRIBE
+    ========================================= */
+    .subscribe((status) => {
+      console.log("Realtime subscription:", status);
+    });
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, []);
 
   /* =========================================
      LOAD TOKENS + HISTORY FROM SUPABASE
@@ -903,7 +964,33 @@ const generateToken = async (centre) => {
   try {
     const now = new Date().toISOString();
 
-    const tokenNumber = `KIS-${String(45 + tokens.length).padStart(3, "0")}`;
+  const { data: latestToken, error: latestTokenError } = await supabase
+  .from("tokens")
+  .select("token_id")
+  .order("token_id", { ascending: false })
+  .limit(1)
+  .maybeSingle();
+
+if (latestTokenError) {
+  console.error("Latest token fetch error:", latestTokenError);
+  alert("Token number generate nahi ho paya. Please try again.");
+  return;
+}
+
+let nextTokenNumber = 45;
+
+if (latestToken?.token_id) {
+  const lastNumber = parseInt(
+    latestToken.token_id.replace("KIS-", ""),
+    10
+  );
+
+  if (!Number.isNaN(lastNumber)) {
+    nextTokenNumber = lastNumber + 1;
+  }
+}
+
+const tokenNumber = `KIS-${String(nextTokenNumber).padStart(3, "0")}`;
 
     const { data: centreData, error: centreError } = await supabase
       .from("procurement_centres")
@@ -972,8 +1059,19 @@ const generateToken = async (centre) => {
       ],
     };
 
-    setTokens((prev) => [...prev, newToken]);
-    setScreen("token");
+    setTokens((prev) => {
+  const alreadyExists = prev.some(
+    (token) => token.id === newToken.id
+  );
+
+  if (alreadyExists) {
+    return prev;
+  }
+
+  return [...prev, newToken];
+});
+
+setScreen("token");
 
   } catch (error) {
     console.error("Unexpected token error:", error);
@@ -1015,31 +1113,49 @@ const generateToken = async (centre) => {
   const removeDemand = (id) => {
     setDemands((prev) => prev.filter((item) => item.id !== id));
   };
+/* =========================================
+   OFFICER FUNCTIONS
+========================================= */
 
-  /* =========================================
-     OFFICER FUNCTIONS
-  ========================================= */
 const updateTokenStatus = async (tokenId) => {
   const statusFlow = {
     Waiting: {
       next: "Entry Completed",
       history: "Entry Completed",
     },
+
     "Entry Completed": {
       next: "Processing",
       history: "Procurement Started",
     },
+
     Processing: {
       next: "Quality Check",
       history: "Quality Check",
     },
+
     "Quality Check": {
       next: "Weighing",
       history: "Weighing",
     },
+
     Weighing: {
       next: "Completed",
       history: "Procurement Completed",
+    },
+
+    /* ================================
+       PAYMENT FLOW
+    ================================= */
+
+    Completed: {
+      next: "Payment Processing",
+      history: "Payment Processing",
+    },
+
+    "Payment Processing": {
+      next: "Payment Completed",
+      history: "Payment Completed",
     },
   };
 
@@ -1164,30 +1280,47 @@ const updateTokenStatus = async (tokenId) => {
       "Quality Check": "Quality Check",
       Weighing: "Weighing",
       Completed: "Procurement Completed",
+
+          "Payment Processing": "Payment Processing",
+    "Payment Completed": "Payment Completed",
     };
     return labels[status] || status;
   };
 
-  const getNextOfficerAction = (status) => {
-    const actions = {
-      Waiting: "Mark Entry",
-      "Entry Completed": "Start Procurement",
-      Processing: "Start Quality Check",
-      "Quality Check": "Start Weighing",
-      Weighing: "Complete",
-    };
-    return actions[status] || "Complete";
+ const getNextOfficerAction = (status) => {
+  const actions = {
+    Waiting: "Mark Entry",
+    "Entry Completed": "Start Procurement",
+    Processing: "Start Quality Check",
+    "Quality Check": "Start Weighing",
+    Weighing: "Complete",
+
+    Completed: "Start Payment",
+    "Payment Processing": "Complete Payment",
   };
 
-  const getQueueAhead = (token) => {
-    if (!token) return 0;
-    const activeAtCentre = tokens.filter(
-      (item) => item.centre === token.centre && item.status !== "Completed"
-    );
-    const index = activeAtCentre.findIndex((item) => item.id === token.id);
-    return index >= 0 ? index : 0;
-  };
+  return actions[status] || "Complete";
+};
 
+const getQueueAhead = (token) => {
+  if (!token) return 0;
+
+  const activeAtCentre = tokens.filter(
+    (item) =>
+      item.centre === token.centre &&
+      ![
+        "Completed",
+        "Payment Processing",
+        "Payment Completed",
+      ].includes(item.status)
+  );
+
+  const index = activeAtCentre.findIndex(
+    (item) => item.id === token.id
+  );
+
+  return index >= 0 ? index : 0;
+};
   /* =========================================
      ROLE NAME
   ========================================= */
@@ -1913,6 +2046,8 @@ const updateTokenStatus = async (tokenId) => {
                   "Quality Check",
                   "Weighing",
                   "Procurement Completed",
+                    "Payment Processing",
+                   "Payment Completed",
                 ].map((step, index) => {
                   const history = farmerToken.history || [];
                   const reached = index === 0 || history.some((item) => item.status === step);
@@ -2665,13 +2800,13 @@ const updateTokenStatus = async (tokenId) => {
 
                 <tbody>
 
-                  {tokens
-                    .filter(
-                      (token) =>
-                        token.centre ===
-                        officerCentre?.centreName
-                    )
-                    .map((token) => (
+                 {tokens
+                   .filter(
+                    (token) =>
+                       token.centre === officerCentre?.centreName &&
+                        token.status !== "Payment Completed"
+                        )
+                       .map((token) => (
 
                       <tr key={token.id}>
 
@@ -2710,20 +2845,20 @@ const updateTokenStatus = async (tokenId) => {
 
                         <td>
 
-                          {token.status !== "Completed" && (
-                            <button
-                              className="action-button"
-                              onClick={() =>
-                                updateTokenStatus(token.id)
-                              }
-                            >
-                              {t(
-                                getNextOfficerAction(
-                                  token.status
-                                )
-                              )}
-                            </button>
+                        {token.status !== "Payment Completed" && (
+                         <button
+                          className="action-button"
+                          onClick={() =>
+                         updateTokenStatus(token.id)
+                        }
+                        >
+                         {t(
+                          getNextOfficerAction(
+                          token.status
+                            )
                           )}
+                          </button>
+                         )}
 
                         </td>
 
@@ -2733,10 +2868,10 @@ const updateTokenStatus = async (tokenId) => {
 
 
                   {tokens.filter(
-                    (token) =>
-                      token.centre ===
-                      officerCentre?.centreName
-                  ).length === 0 && (
+                   (token) =>
+                     token.centre === officerCentre?.centreName &&
+                     token.status !== "Payment Completed"
+                    ).length === 0 && (
 
                     <tr>
 
