@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Drop Shadow -->
+    <filter id="appShadow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.14" />
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08" />
+    </filter>
+
+    <!-- Main 'N' Body Gradient -->
+    <linearGradient id="nArchGrad" x1="0.1" y1="0.9" x2="0.8" y2="0.1">
+      <stop offset="0%" stop-color="#05283b" />
+      <stop offset="35%" stop-color="#0a4647" />
+      <stop offset="70%" stop-color="#0f7a3e" />
+      <stop offset="100%" stop-color="#2cb32d" />
+    </linearGradient>
+
+    <!-- Center Left Leaf Gradient -->
+    <linearGradient id="leafLeftGrad" x1="0.1" y1="0.8" x2="0.8" y2="0.1">
+      <stop offset="0%" stop-color="#14833b" />
+      <stop offset="50%" stop-color="#3eb83a" />
+      <stop offset="100%" stop-color="#7edd34" />
+    </linearGradient>
+
+    <!-- Center Right Leaf Gradient -->
+    <linearGradient id="leafRightGrad" x1="0.2" y1="0.9" x2="0.9" y2="0.1">
+      <stop offset="0%" stop-color="#0d6332" />
+      <stop offset="60%" stop-color="#1ea63b" />
+      <stop offset="100%" stop-color="#4fd637" />
+    </linearGradient>
+
+    <!-- Top Sprout Leaves Gradient -->
+    <linearGradient id="sproutGrad" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1b8e38" />
+      <stop offset="50%" stop-color="#34b833" />
+      <stop offset="100%" stop-color="#69cf2d" />
+    </linearGradient>
+
+    <!-- Arc Glow Gradient -->
+    <linearGradient id="arcGrad" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#15803d" />
+      <stop offset="60%" stop-color="#34b833" />
+      <stop offset="100%" stop-color="#7edd34" />
+    </linearGradient>
+
+    <!-- Circuit Trace Gradient -->
+    <linearGradient id="circuitGrad" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#0d5d36" />
+      <stop offset="50%" stop-color="#188f3c" />
+      <stop offset="100%" stop-color="#2bb438" />
+    </linearGradient>
+  </defs>
+
+  <!-- App Icon Base Tile -->
+  <rect x="36" y="36" width="440" height="440" rx="105" fill="#ffffff" filter="url(#appShadow)" />
+
+  <!-- LOGO EMBLEM GROUP -->
+  <g id="logo-mark">
+    <!-- Top Decorative Halo Arc -->
+    <path d="M 218 135 A 82 82 0 0 1 345 108" fill="none" stroke="url(#arcGrad)" stroke-width="7" stroke-linecap="round" />
+
+    <!-- Main Bold 'N' Structure -->
+    <!-- Left Leg -->
+    <path d="M 168 322 L 168 152 C 168 137 179 125 194 125 C 209 125 220 137 220 152 L 220 322 C 220 324 219 326 217 326 L 171 326 C 169 326 168 324 168 322 Z" fill="#04273a" />
+
+    <!-- 'N' Arch & Right Stem (Merged Curved Geometry) -->
+    <path d="M 194 125 C 235 125 312 185 338 316 C 339 323 334 326 327 326 L 290 326 C 285 326 280 321 278 315 C 260 250 220 190 194 125 Z" fill="url(#nArchGrad)" />
+
+    <!-- Top Sprout Leaves -->
+    <!-- Sprout Left Leaf -->
+    <path d="M 331 168 C 318 168 290 148 290 130 C 310 128 335 142 331 168 Z" fill="url(#sproutGrad)" />
+    <!-- Sprout Right Leaf -->
+    <path d="M 333 167 C 330 145 352 100 385 92 C 388 122 360 162 333 167 Z" fill="url(#sproutGrad)" />
+
+    <!-- Large Center Foliage Inside 'N' -->
+    <!-- Right Layer of Center Leaf -->
+    <path d="M 276 295 C 280 230 338 175 352 173 C 353 188 340 270 286 312 Z" fill="url(#leafRightGrad)" />
+
+    <!-- Prominent Main Center Leaf -->
+    <path d="M 268 280 C 248 215 315 158 360 171 C 362 205 315 285 273 293 Z" fill="url(#leafLeftGrad)" />
+
+    <!-- Center Leaf Diagonal Crease / Highlight Curve -->
+    <path d="M 269 281 C 298 238 330 200 360 171" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" opacity="0.4" />
+
+    <!-- Tech Circuit Traces (Agri-Tech Digital Lines) -->
+    <!-- Left Circuit Trace -->
+    <path d="M 356 318 L 356 220" fill="none" stroke="url(#circuitGrad)" stroke-width="6.5" stroke-linecap="round" />
+    <circle cx="356" cy="214" r="9" fill="none" stroke="#23a438" stroke-width="5.5" />
+    <circle cx="356" cy="214" r="3.5" fill="#23a438" />
+
+    <!-- Middle Circuit Trace with Angle Step -->
+    <path d="M 370 312 L 370 278 L 385 263 L 385 186" fill="none" stroke="url(#circuitGrad)" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="385" cy="180" r="9" fill="none" stroke="#2cb335" stroke-width="5.5" />
+    <circle cx="385" cy="180" r="3.5" fill="#2cb335" />
+
+    <!-- Right Circuit Trace with Angle Step -->
+    <path d="M 382 300 L 396 286 L 406 250 L 406 208" fill="none" stroke="url(#circuitGrad)" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="406" cy="202" r="9" fill="none" stroke="#33be32" stroke-width="5.5" />
+    <circle cx="406" cy="202" r="3.5" fill="#33be32" />
+  </g>
+
+  <!-- TYPOGRAPHY: "NovaFarm" -->
+  <g id="brand-name">
+    <text x="65" y="401" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Montserrat', 'Inter', sans-serif" font-size="62" font-weight="900" letter-spacing="-1.5">
+      <!-- 'Nova' in Deep Navy Blue -->
+      <tspan fill="#03253d">Nova</tspan>
+      <!-- 'Farm' in Vibrant Green -->
+      <tspan fill="#0e833b" dx="0">Farm</tspan>
+    </text>
+  </g>
+</svg>
