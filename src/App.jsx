@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Capacitor } from "@capacitor/core";
+import { LocalNotifications } from "@capacitor/local-notifications";
 import "./App.css";
 import "./language-toggle.css";
 import { supabase } from "./supabaseClient";
@@ -345,7 +347,20 @@ const translationsHi = {
   "Tap to Speak": "बोलने के लिए टैप करें",
   "Demo Feature": "डेमो फीचर",
   "Close": "बंद करें",
-    "Payment Processing": "भुगतान प्रक्रिया में",
+    "Notifications": "सूचनाएं",
+  "No new notifications": "कोई नई सूचना नहीं है",
+  "Mark all as read": "सभी को पढ़ा हुआ करें",
+  "Token booked successfully": "टोकन सफलतापूर्वक बुक हो गया",
+  "Your token is booked and the procurement journey has started.": "आपका टोकन बुक हो गया है और खरीद प्रक्रिया शुरू हो गई है।",
+  "Your token entry has been completed.": "आपके टोकन का प्रवेश पूरा हो गया है।",
+  "Procurement has started for your token.": "आपके टोकन की खरीद प्रक्रिया शुरू हो गई है।",
+  "Quality check has started for your crop.": "आपकी फसल की गुणवत्ता जांच शुरू हो गई है।",
+  "Weighing has started for your crop.": "आपकी फसल का वजन शुरू हो गया है।",
+  "Procurement completed successfully.": "खरीद प्रक्रिया सफलतापूर्वक पूरी हो गई है।",
+  "Your payment is being processed.": "आपका भुगतान प्रक्रिया में है।",
+  "Your payment has been completed.": "आपका भुगतान पूरा हो गया है।",
+  "Your turn is approaching. Please be ready.": "आपकी बारी आने वाली है। कृपया तैयार रहें।",
+  "Payment Processing": "भुगतान प्रक्रिया में",
   "Payment Completed": "भुगतान पूरा हो गया",
   "Start Payment": "भुगतान शुरू करें",
   "Complete Payment": "भुगतान पूरा करें",
@@ -381,6 +396,87 @@ function App() {
   ========================================= */
 
   const [screen, setScreen] = useState("roles");
+
+  /* =========================================
+     IN-APP NOTIFICATIONS
+  ========================================= */
+
+  const [notifications, setNotifications] = useState(() => {
+    try {
+      const saved = localStorage.getItem("novaFarmNotifications");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+
+
+  useEffect(() => {
+    localStorage.setItem("novaFarmNotifications", JSON.stringify(notifications));
+  }, [notifications]);
+
+  useEffect(() => {
+    const requestNotificationPermission = async () => {
+      if (!Capacitor.isNativePlatform()) return;
+      try {
+        const permissions = await LocalNotifications.checkPermissions();
+        if (permissions.display !== "granted") {
+          await LocalNotifications.requestPermissions();
+        }
+      } catch (error) {
+        console.error("Local notification permission error:", error);
+      }
+    };
+    requestNotificationPermission();
+  }, []);
+
+  const addNotification = (title, message, tokenId, type = "status") => {
+    setNotifications((prev) => {
+      const alreadyExists = prev.some(
+        (notification) =>
+          notification.tokenId === tokenId && notification.type === type
+      );
+      if (alreadyExists) return prev;
+
+      const notificationId = Date.now();
+      const newNotification = {
+        id: notificationId, title, message, tokenId, type,
+        time: new Date().toISOString(), read: false,
+      };
+
+      if (Capacitor.isNativePlatform()) {
+        LocalNotifications.schedule({
+          notifications: [{
+            id: notificationId,
+            title: `Nova Farm • ${title}`,
+            body: message,
+            schedule: { at: new Date(Date.now() + 300) },
+            extra: { tokenId, type },
+          }],
+        }).catch((error) => console.error("Local notification error:", error));
+      }
+
+      return [newNotification, ...prev].slice(0, 50);
+    });
+  };
+
+  const unreadNotificationCount = notifications.filter((notification) => !notification.read).length;
+
+  const markAllNotificationsRead = () => {
+    setNotifications((prev) => prev.map((notification) => ({ ...notification, read: true })));
+  };
+
+  const markNotificationRead = (notificationId) => {
+    setNotifications((prev) =>
+      prev.map((notification) =>
+        notification.id === notificationId ? { ...notification, read: true } : notification
+      )
+    );
+  };
   const [showVoiceAssistant, setShowVoiceAssistant] = useState(false);
 
   /* =========================================
@@ -490,6 +586,25 @@ useEffect(() => {
         console.log("Realtime token update:", payload);
 
         const updatedToken = payload.new;
+
+        const currentFarmerId = loginIdRef.current || "Demo Farmer";
+        const isCurrentFarmerToken =
+          updatedToken.farmer === currentFarmerId;
+
+        const notificationMap = {
+          "Entry Completed": { title: "Entry Completed", message: "Your token entry has been completed." },
+          Processing: { title: "Procurement Started", message: "Procurement has started for your token." },
+          "Quality Check": { title: "Quality Check", message: "Quality check has started for your crop." },
+          Weighing: { title: "Weighing", message: "Weighing has started for your crop." },
+          Completed: { title: "Procurement Completed", message: "Procurement completed successfully." },
+          "Payment Processing": { title: "Payment Processing", message: "Your payment is being processed." },
+          "Payment Completed": { title: "Payment Completed", message: "Your payment has been completed." },
+        };
+
+        const notification = notificationMap[updatedToken.status];
+        if (isCurrentFarmerToken && notification) {
+          addNotification(notification.title, notification.message, updatedToken.token_id, updatedToken.status);
+        }
 
         setTokens((prev) =>
           prev.map((token) => {
@@ -668,6 +783,10 @@ useEffect(() => {
   const [loginId, setLoginId] = useState(() =>
     sessionStorage.getItem("kisanSetuLoginId") || ""
   );
+   const loginIdRef = useRef("");
+  useEffect(() => {
+    loginIdRef.current = loginId;
+  }, [loginId]);
   const [loginMobile, setLoginMobile] = useState(() =>
     sessionStorage.getItem("kisanSetuLoginMobile") || ""
   );
@@ -1321,6 +1440,20 @@ const getQueueAhead = (token) => {
 
   return index >= 0 ? index : 0;
 };
+
+  useEffect(() => {
+    if (loggedInRole !== "farmer" || !farmerToken) return;
+    const ahead = getQueueAhead(farmerToken);
+    if (ahead > 0 && ahead <= 3) {
+      addNotification(
+        "Your turn is approaching",
+        "Your turn is approaching. Please be ready.",
+        farmerToken.id,
+        "Queue Approaching"
+      );
+    }
+  }, [loggedInRole, farmerToken?.id, farmerToken?.status, tokens.length]);
+
   /* =========================================
      ROLE NAME
   ========================================= */
@@ -1384,66 +1517,528 @@ const getQueueAhead = (token) => {
   return (
     <div className="app">
 
-      {/* =========================================
-          HEADER
-      ========================================= */}
+  {/* =========================================
+    HEADER
+========================================= */}
 
-      <header className="header">
+<header className="header">
 
-        <div>
-          <div className="logo">
-            {t("🌾 Nova Farm")}
-          </div>
+  <div>
+    <div className="logo">
+      {t("🌾 Nova Farm")}
+    </div>
 
-          <div className="tagline">
-            {t("Connecting Farmers, Buyers & Procurement Centres")}
-          </div>
-        </div>
+    <div className="tagline">
+      {t("Connecting Farmers, Buyers & Procurement Centres")}
+    </div>
+  </div>
 
-        <div className="language-switcher">
-          <button
-            className={`language-button ${language === "en" ? "active" : ""}`}
-            onClick={() => changeLanguage("en")}
+
+  <div className="header-actions">
+
+    {/* FARMER NOTIFICATION BELL */}
+    {loggedInRole === "farmer" && (
+      <div style={{ position: "relative" }}>
+
+        <button
+          type="button"
+          className="secondary-button header-button"
+          onClick={() => {
+            setShowNotifications((prev) => !prev);
+            setShowMenu(false);
+            setShowLanguageMenu(false);
+          }}
+          aria-label="Notifications"
+          style={{
+            position: "relative",
+            minWidth: "48px"
+          }}
+        >
+          🔔
+
+          {unreadNotificationCount > 0 && (
+            <span
+              style={{
+                position: "absolute",
+                top: "-6px",
+                right: "-6px",
+                minWidth: "20px",
+                height: "20px",
+                padding: "0 5px",
+                borderRadius: "999px",
+                background: "#dc2626",
+                color: "#ffffff",
+                fontSize: "11px",
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "2px solid #ffffff"
+              }}
+            >
+              {unreadNotificationCount > 99
+                ? "99+"
+                : unreadNotificationCount}
+            </span>
+          )}
+        </button>
+
+
+        {/* NOTIFICATION PANEL */}
+        {showNotifications && (
+          <div
+            style={{
+              position: "absolute",
+              top: "calc(100% + 10px)",
+              right: 0,
+              width: "min(360px, calc(100vw - 32px))",
+              maxHeight: "420px",
+              overflowY: "auto",
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
+              borderRadius: "16px",
+              boxShadow:
+                "0 18px 45px rgba(15,23,42,0.18)",
+              zIndex: 1200,
+              padding: "12px"
+            }}
           >
-            English
-          </button>
-          <button
-            className={`language-button ${language === "hi" ? "active" : ""}`}
-            onClick={() => changeLanguage("hi")}
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "12px",
+                padding: "4px 4px 10px"
+              }}
+            >
+              <strong>
+                {t("Notifications")}
+              </strong>
+
+              {unreadNotificationCount > 0 && (
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={markAllNotificationsRead}
+                >
+                  {t("Mark all as read")}
+                </button>
+              )}
+            </div>
+
+
+            {notifications.length === 0 ? (
+
+              <div
+                style={{
+                  padding: "24px 12px",
+                  textAlign: "center",
+                  color: "#64748b",
+                  fontSize: "14px"
+                }}
+              >
+                🔕 {t("No new notifications")}
+              </div>
+
+            ) : (
+
+              notifications.map((notification) => (
+
+                <button
+                  key={notification.id}
+                  type="button"
+                  onClick={() =>
+                    markNotificationRead(notification.id)
+                  }
+                  style={{
+                    width: "100%",
+                    border: "0",
+                    borderRadius: "12px",
+                    padding: "12px",
+                    marginBottom: "7px",
+                    textAlign: "left",
+                    background: notification.read
+                      ? "#f8fafc"
+                      : "#eff6ff",
+                    cursor: "pointer"
+                  }}
+                >
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "9px"
+                    }}
+                  >
+
+                    <span style={{ fontSize: "18px" }}>
+                      {notification.type ===
+                      "Payment Completed"
+                        ? "✅"
+                        : notification.type ===
+                          "Payment Processing"
+                        ? "💳"
+                        : notification.type ===
+                          "Queue Approaching"
+                        ? "🔔"
+                        : notification.type ===
+                          "Quality Check"
+                        ? "🔍"
+                        : notification.type ===
+                          "Weighing"
+                        ? "⚖️"
+                        : notification.type ===
+                          "Procurement Completed"
+                        ? "✅"
+                        : notification.type ===
+                          "Procurement Started"
+                        ? "🌾"
+                        : "🎫"}
+                    </span>
+
+
+                    <span style={{ flex: 1 }}>
+
+                      <strong
+                        style={{
+                          display: "block",
+                          fontSize: "13px",
+                          color: "#0f172a",
+                          marginBottom: "3px"
+                        }}
+                      >
+                        {t(notification.title)}
+                      </strong>
+
+                      <span
+                        style={{
+                          display: "block",
+                          fontSize: "12px",
+                          color: "#64748b",
+                          lineHeight: 1.4
+                        }}
+                      >
+                        {t(notification.message)}
+                      </span>
+
+                      <span
+                        style={{
+                          display: "block",
+                          marginTop: "5px",
+                          fontSize: "10px",
+                          color: "#94a3b8"
+                        }}
+                      >
+                        {new Date(
+                          notification.time
+                        ).toLocaleString()}
+                      </span>
+
+                    </span>
+
+
+                    {!notification.read && (
+                      <span
+                        style={{
+                          width: "7px",
+                          height: "7px",
+                          borderRadius: "50%",
+                          background: "#2563eb",
+                          marginTop: "5px"
+                        }}
+                      />
+                    )}
+
+                  </div>
+
+                </button>
+
+              ))
+
+            )}
+
+          </div>
+        )}
+
+      </div>
+    )}
+
+
+    {/* ROLE NAME */}
+    {loggedInRole && (
+      <span className="logged-role">
+        {getRoleName()}
+      </span>
+    )}
+
+
+    {/* FARMER MENU */}
+    {loggedInRole === "farmer" && (
+      <div
+        style={{
+          position: "relative"
+        }}
+      >
+
+        <button
+          type="button"
+          className="secondary-button header-button"
+          onClick={() => {
+            setShowMenu((prev) => !prev);
+            setShowNotifications(false);
+            setShowLanguageMenu(false);
+          }}
+          aria-label="Menu"
+          style={{
+            minWidth: "48px",
+            fontSize: "20px"
+          }}
+        >
+          ☰
+        </button>
+
+
+        {showMenu && (
+          <div
+            style={{
+              position: "absolute",
+              top: "calc(100% + 10px)",
+              right: 0,
+              width: "250px",
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
+              borderRadius: "16px",
+              boxShadow:
+                "0 18px 45px rgba(15,23,42,0.18)",
+              zIndex: 1300,
+              padding: "8px"
+            }}
           >
-            हिंदी
-          </button>
-        </div>
 
-        <div className="header-actions">
+            {/* 1. TOKEN HISTORY */}
 
-          {loggedInRole && (
-            <>
-              <span className="logged-role">
-                {getRoleName()}
+            <button
+              type="button"
+              className="menu-item"
+              onClick={() => {
+                setShowMenu(false);
+
+                /*
+                 * Yahan tumhare existing Token History
+                 * screen/function ko call karna hai.
+                 *
+                 * Abhi current App.jsx me dedicated
+                 * Token History screen nahi hai.
+                 */
+                alert(
+                  t(
+                    "Token History is available through your procurement records."
+                  )
+                );
+              }}
+            >
+              📋
+              <span>
+                {t("Token History")}
+              </span>
+            </button>
+
+
+            {/* 2. NOTIFICATIONS */}
+
+            <button
+              type="button"
+              className="menu-item"
+              onClick={() => {
+                setShowMenu(false);
+                setShowLanguageMenu(false);
+                setShowNotifications(true);
+              }}
+            >
+              🔔
+              <span style={{ flex: 1 }}>
+                {t("Notifications")}
               </span>
 
-              <button
-                className="secondary-button header-button"
-                onClick={logout}
-              >
-                {t("Logout")}
-              </button>
-            </>
-          )}
-
-          {!loggedInRole && screen !== "roles" && (
-            <button
-              className="secondary-button header-button"
-              onClick={() => setScreen("roles")}
-            >
-              {t("Roles")}
+              {unreadNotificationCount > 0 && (
+                <span
+                  style={{
+                    minWidth: "22px",
+                    height: "22px",
+                    padding: "0 6px",
+                    borderRadius: "999px",
+                    background: "#dc2626",
+                    color: "#ffffff",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}
+                >
+                  {unreadNotificationCount > 99
+                    ? "99+"
+                    : unreadNotificationCount}
+                </span>
+              )}
             </button>
-          )}
 
-        </div>
 
-      </header>
+            {/* 3. CUSTOMER SUPPORT */}
+
+            <button
+              type="button"
+              className="menu-item"
+              onClick={() => {
+                setShowMenu(false);
+
+                /*
+                 * Current source me dedicated Customer Support
+                 * screen/function nahi mila.
+                 * Isliye invalid screen open nahi kar rahe.
+                 */
+                alert(
+                  t(
+                    "Customer Support will be available here."
+                  )
+                );
+              }}
+            >
+              🎧
+              <span>
+                {t("Customer Support")}
+              </span>
+            </button>
+
+
+            {/* 4. CHANGE LANGUAGE */}
+
+            <div
+              style={{
+                position: "relative"
+              }}
+            >
+
+              <button
+                type="button"
+                className="menu-item"
+                onClick={() =>
+                  setShowLanguageMenu((prev) => !prev)
+                }
+              >
+                🌐
+                <span style={{ flex: 1 }}>
+                  {t("Change Language")}
+                </span>
+
+                <span>
+                  {showLanguageMenu ? "⌃" : "›"}
+                </span>
+              </button>
+
+
+              {showLanguageMenu && (
+                <div
+                  style={{
+                    margin:
+                      "0 8px 8px 40px",
+                    background: "#f8fafc",
+                    borderRadius: "10px",
+                    padding: "5px"
+                  }}
+                >
+
+                  <button
+                    type="button"
+                    className="menu-language-item"
+                    onClick={() => {
+                      changeLanguage("en");
+                      setShowLanguageMenu(false);
+                      setShowMenu(false);
+                    }}
+                  >
+                    English
+                    {language === "en" && (
+                      <span>✓</span>
+                    )}
+                  </button>
+
+
+                  <button
+                    type="button"
+                    className="menu-language-item"
+                    onClick={() => {
+                      changeLanguage("hi");
+                      setShowLanguageMenu(false);
+                      setShowMenu(false);
+                    }}
+                  >
+                    हिंदी
+                    {language === "hi" && (
+                      <span>✓</span>
+                    )}
+                  </button>
+
+                </div>
+              )}
+
+            </div>
+
+
+            {/* 5. LOGOUT */}
+
+            <button
+              type="button"
+              className="menu-item"
+              onClick={() => {
+                setShowMenu(false);
+                setShowLanguageMenu(false);
+                logout();
+              }}
+              style={{
+                color: "#dc2626"
+              }}
+            >
+              🚪
+              <span>
+                {t("Logout")}
+              </span>
+            </button>
+
+          </div>
+        )}
+
+      </div>
+    )}
+
+
+    {/* NON-FARMER LOGOUT */}
+    {loggedInRole && loggedInRole !== "farmer" && (
+      <button
+        className="secondary-button header-button"
+        onClick={logout}
+      >
+        {t("Logout")}
+      </button>
+    )}
+
+
+    {/* ROLE BUTTON WHEN NOT LOGGED IN */}
+    {!loggedInRole && screen !== "roles" && (
+      <button
+        className="secondary-button header-button"
+        onClick={() => setScreen("roles")}
+      >
+        {t("Roles")}
+      </button>
+    )}
+
+  </div>
+
+</header>
 
       {/* =========================================
           ROLE SELECTION

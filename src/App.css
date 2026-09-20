@@ -1599,3 +1599,30 @@ footer small {
   }
 }
 
+/* =========================================
+   NOVA FARM - HEADER MENU
+========================================= */
+
+.menu-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 14px;
+  color: #0f172a;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.menu-item:hover {
+  background: #f1f5f9;
+}
+
+.menu-language-item {
+  position: relative;
+}
+
+.menu-language-item:hover {
+  background: #f1f5f9;
+}
