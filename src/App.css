@@ -1494,8 +1494,10 @@ footer small {
 ========================================= */
 
 .live-token-card {
+  box-sizing: border-box;
   margin: 22px 0;
   padding: 22px;
+  width: 100%;
   border: 1px solid rgba(35, 122, 62, 0.22);
   border-radius: 18px;
   background: linear-gradient(135deg, #ffffff, #f4fbf5);
@@ -1511,6 +1513,7 @@ footer small {
 
 .live-token-header h2 {
   margin: 5px 0 0;
+  overflow-wrap: anywhere;
 }
 
 .live-token-subtitle {
@@ -1551,6 +1554,25 @@ footer small {
   background: #2e9d4d;
   box-shadow: 0 0 0 5px rgba(46, 157, 77, 0.12);
   animation: livePulse 1.8s infinite;
+}
+
+.live-weight-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(35, 122, 62, 0.12);
+  color: #496052;
+  font-size: 13px;
+}
+
+.live-weight-info strong {
+  color: #14532d;
+  font-size: 16px;
 }
 
 .live-timeline {
@@ -1618,6 +1640,28 @@ footer small {
   opacity: 0.7;
 }
 
+.live-payout-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #14532d;
+  color: #ffffff;
+}
+
+.live-payout-summary span {
+  font-size: 13px;
+  opacity: 0.86;
+}
+
+.live-payout-summary strong {
+  font-size: 20px;
+  white-space: nowrap;
+}
+
 .live-token-mini {
   display: flex;
   flex-wrap: wrap;
@@ -1635,6 +1679,10 @@ footer small {
 }
 
 @media (max-width: 700px) {
+  .live-token-card {
+    padding: 18px;
+  }
+
   .live-timeline {
     grid-template-columns: 1fr 1fr;
   }
@@ -1645,8 +1693,21 @@ footer small {
 }
 
 @media (max-width: 480px) {
+  .live-token-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
   .live-timeline {
     grid-template-columns: 1fr;
+  }
+
+  .live-weight-info,
+  .live-payout-summary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
   }
 }
 
